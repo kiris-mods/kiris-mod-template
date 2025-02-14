@@ -42,5 +42,7 @@ configurations {
 
 artifacts {
     commonJava sourceSets.main.java.sourceDirectories.singleFile
-    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+    for (def dir : sourceSets.main.resources.sourceDirectories.files) {
+        commonResources dir
+    }
 }
