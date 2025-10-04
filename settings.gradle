@@ -27,7 +27,7 @@ plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.9.0'
 }
 
-// This should match the folder name of the project, or else IDEA may complain (see https://youtrack.jetbrains.com/issue/IDEA-317606)
+// This should match the mod ID so that the published coordinates can be sensible
 rootProject.name = "kiris-mod-template"
 include("common")
 include("fabric")
