@@ -13,11 +13,7 @@ configurations {
 }
 
 dependencies {
-    compileOnly(project(":$mod_id-common")) {
-        capabilities {
-            requireCapability "$group:$mod_id"
-        }
-    }
+    compileOnly(project(":$mod_id-common"))
     commonJava project(path: ":$mod_id-common", configuration: "commonJava")
     commonResources project(path: ":$mod_id-common", configuration: "commonResources")
 }
