@@ -13,13 +13,13 @@ configurations {
 }
 
 dependencies {
-    compileOnly(project(":common")) {
+    compileOnly(project(":$mod_id-common")) {
         capabilities {
             requireCapability "$group:$mod_id"
         }
     }
-    commonJava project(path: ":common", configuration: "commonJava")
-    commonResources project(path: ":common", configuration: "commonResources")
+    commonJava project(path: ":$mod_id-common", configuration: "commonJava")
+    commonResources project(path: ":$mod_id-common", configuration: "commonResources")
 }
 
 tasks.named("compileJava", JavaCompile) {

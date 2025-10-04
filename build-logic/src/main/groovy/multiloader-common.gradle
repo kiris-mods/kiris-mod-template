@@ -5,19 +5,12 @@ plugins {
     id "net.neoforged.licenser"
 }
 
-def ENV = System.getenv()
-def NOW = new Date();
-def buildTime = ENV.BUILD_TIME ?: NOW.format('yyyyMMddHHmmss')
-
-boolean isPreviewBuild = !ENV.TAG || ENV.TAG.matches(".+-.+")
-def buildNumber = !ENV.TAG ? ("${ENV.BUILD_NUMBER ? "build.${ENV.BUILD_NUMBER}" : buildTime}") : ""
-version = (ENV.TAG ?: "${minecraft_version}-development") + ((isPreviewBuild && !ENV.TAG) ? "+${buildNumber}" : "")
-
-def mod_name = rootProject.name.replaceAll("-", "_").toLowerCase(Locale.ROOT)
-
-base {
-    archivesName = "${rootProject.name}-${project.name}"
-}
+boolean noTag = !providers.environmentVariable("TAG").getOrNull()
+boolean isPreviewBuild = providers.environmentVariable("TAG").getOrNull().with { !it || it.matches(".+-.+") }
+def buildTime = providers.environmentVariable("BUILD_TIME").orElse(project.provider { new Date().format('yyyyMMddHHmmss') })
+version = providers.environmentVariable("TAG").getOrElse("${minecraft_version}-deveopment") + (
+    (isPreviewBuild && noTag) ? "+${providers.environmentVariable("BUILD_NUMBER").map { "build.$it" as String }.orElse(buildTime).get()}" : ""
+)
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(java_version)
@@ -75,9 +68,9 @@ repositories {
 // Read more about capabilities here: https://docs.gradle.org/current/userguide/component_capabilities.html#sec:declaring-additional-capabilities-for-a-local-component
 ["apiElements", "runtimeElements", "sourcesElements", "javadocElements"].each { variant ->
     configurations."$variant".outgoing {
-        capability("$group:${base.archivesName.get()}:$version")
-        capability("$group:$mod_id-${project.name}-${minecraft_version}:$version")
-        capability("$group:$mod_id:$version")
+        capability("$group:${project.name}:$version")
+        capability("$group:${project.name}-${minecraft_version}:$version")
+        capability("$group:${rootProject.name}:$version")
     }
     publishing.publications.configureEach {
         suppressPomMetadataWarningsFor(variant)
@@ -85,26 +78,26 @@ repositories {
 }
 
 sourcesJar {
+    def mod_id = project.mod_id
     from(rootProject.file("LICENSE.md")) {
-        rename { "LICENSE_${mod_name}.md" }
+        rename { "LICENSE_${mod_id}.md" }
     }
 }
 
 jar {
+    def mod_id = project.mod_id
     from(rootProject.file("LICENSE.md")) {
-        rename { "LICENSE_${mod_name}.md" }
+        rename { "LICENSE_${mod_id}.md" }
     }
 
     manifest {
         attributes([
             "Specification-Title"         : project.mod_name,
             "Specification-Vendor"        : project.author,
-            "Specification-Version"       : project.jar.archiveVersion,
+            "Specification-Version"       : project.provider { project.version },
             "Implementation-Title"        : project.name,
-            "Implementation-Version"      : project.jar.archiveVersion,
+            "Implementation-Version"      : project.provider { project.version },
             "Implementation-Vendor"       : project.author,
-            "Implementation-Timestamp"    : new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-            "Timestamp"                   : System.currentTimeMillis(),
             "Built-On-Java"               : "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})",
             "Built-On-Minecraft"          : project.minecraft_version
         ])
@@ -188,17 +181,16 @@ tasks.named("assemble").configure{dependsOn "licenseFormat"}
 publishing {
     publications {
         "mavenJava${project.name}"(MavenPublication) {
-            artifactId "${rootProject.name}-${project.name}"
             from components.java
         }
     }
     repositories {
-        if (ENV.MAVEN_UPLOAD_URL) {
+        if (providers.environmentVariable("MAVEN_UPLOAD_URL").isPresent()) {
             maven {
-                url = ENV.MAVEN_UPLOAD_URL
+                url = providers.environmentVariable("MAVEN_UPLOAD_URL").get()
                 credentials {
-                    username = ENV.MAVEN_UPLOAD_USERNAME
-                    password = ENV.MAVEN_UPLOAD_PASSWORD
+                    username = providers.environmentVariable("MAVEN_UPLOAD_USERNAME").get()
+                    password = providers.environmentVariable("MAVEN_UPLOAD_PASSWORD").get()
                 }
             }
         }
