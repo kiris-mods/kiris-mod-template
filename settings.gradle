@@ -28,10 +28,10 @@ plugins {
 }
 
 // This should match the mod ID so that the published coordinates can be sensible
-rootProject.name = "$mod_id"
-include(":$mod_id-common")
-project(":$mod_id-common").projectDir = file("common")
-include(":$mod_id-fabric")
-project(":$mod_id-fabric").projectDir = file("fabric")
-include(":$mod_id-neoforge")
-project(":$mod_id-neoforge").projectDir = file("neoforge")
+rootProject.name = "kiricattustemplate"
+include(":${rootProject.name}-common")
+project(":${rootProject.name}-common").projectDir = file("common")
+include(":${rootProject.name}-fabric")
+project(":${rootProject.name}-fabric").projectDir = file("fabric")
+include(":${rootProject.name}-neoforge")
+project(":${rootProject.name}-neoforge").projectDir = file("neoforge")
