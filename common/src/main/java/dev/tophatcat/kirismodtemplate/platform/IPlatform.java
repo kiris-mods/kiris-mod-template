@@ -48,7 +48,7 @@ public interface IPlatform {
     <T extends Item> Supplier<T> registerItem(String id, Supplier<T> item);
     <T extends SoundEvent> Supplier<T> registerSound(String id, Supplier<T> sound);
     <T extends CreativeModeTab> Supplier<T> registerCreativeModeTab(String id, Supplier<T> tab);
-    <E extends Mob> Supplier<SpawnEggItem> makeSpawnEgg(Supplier<EntityType<E>> entityType, int primaryEggColour,
-                                                        int secondaryEggColour, Item.Properties itemProperties);
+    <E extends Mob> Supplier<SpawnEggItem> makeSpawnEgg(
+        Item.Properties itemProperties, Supplier<EntityType<E>> entityType);
     CreativeModeTab.Builder newCreativeTabBuilder();
 }

@@ -27,7 +27,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -89,8 +89,8 @@ public class PlatformFabric implements IPlatform {
 
     @Override
     public <E extends Mob> Supplier<SpawnEggItem> makeSpawnEgg(
-        Supplier<EntityType<E>> entityType, int primaryColor, int secondaryColor, Item.Properties itemProperties) {
-        return () -> new SpawnEggItem(entityType.get(), primaryColor, secondaryColor, itemProperties);
+        Item.Properties itemProperties, Supplier<EntityType<E>> entityType) {
+        return () -> new SpawnEggItem(itemProperties.spawnEgg(entityType.get()));
     }
 
     @Override
@@ -101,7 +101,7 @@ public class PlatformFabric implements IPlatform {
     @SuppressWarnings("unchecked")
     private static <T, R extends Registry<? super T>> Supplier<T> registerSupplier(
         R registry, String id, Supplier<T> object) {
-        final T registeredObject = Registry.register((Registry<T>) registry, ResourceLocation.fromNamespaceAndPath(
+        final T registeredObject = Registry.register((Registry<T>) registry, Identifier.fromNamespaceAndPath(
             TemplateCommon.MOD_ID, id), object.get());
         return () -> registeredObject;
     }
@@ -109,7 +109,7 @@ public class PlatformFabric implements IPlatform {
     @SuppressWarnings("unchecked")
     private static <T, R extends Registry<? super T>> Holder<T> registerHolder(
         R registry, String id, Supplier<T> object) {
-        return Registry.registerForHolder((Registry<T>) registry, ResourceLocation.fromNamespaceAndPath(
+        return Registry.registerForHolder((Registry<T>) registry, Identifier.fromNamespaceAndPath(
             TemplateCommon.MOD_ID, id), object.get());
     }
 }

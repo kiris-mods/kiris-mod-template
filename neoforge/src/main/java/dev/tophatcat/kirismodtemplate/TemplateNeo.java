@@ -59,7 +59,7 @@ public class TemplateNeo {
         CREATIVE_TABS.register(bus);
         TemplateCommon.init();
 
-        if (FMLEnvironment.dist == Dist.CLIENT) {
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
             bus.addListener(TemplateRenderingNeo::registerEntityModels);
             bus.addListener(TemplateRenderingNeo::registerModelLayers);
         }

@@ -32,7 +32,7 @@ repositories {
 
     maven {
         name = "Team Resourceful Maven"
-        url = "https://maven.teamresourceful.com/repository/maven-public/"
+        url = "https://maven.teamresourceful.com/repository/maven-releases/"
     }
 
     maven {
@@ -53,6 +53,14 @@ repositories {
     maven {
         name = "SmartBrainLib (SBL) Maven Repo"
         url = "https://dl.cloudsmith.io/public/tslat/sbl/maven/"
+    }
+
+    maven {
+        name = "GeckoLib"
+        url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
+        content {
+            includeGroup("software.bernie.geckolib")
+        }
     }
 
     maven {

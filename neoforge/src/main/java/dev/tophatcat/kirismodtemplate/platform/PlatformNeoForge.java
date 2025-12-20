@@ -35,7 +35,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 
 public class PlatformNeoForge implements IPlatform {
 
@@ -51,7 +50,7 @@ public class PlatformNeoForge implements IPlatform {
 
     @Override
     public boolean isDevelopmentEnvironment() {
-        return !FMLEnvironment.production;
+        return !FMLEnvironment.isProduction();
     }
 
     @Override
@@ -87,8 +86,8 @@ public class PlatformNeoForge implements IPlatform {
 
     @Override
     public <E extends Mob> Supplier<SpawnEggItem> makeSpawnEgg(
-        Supplier<EntityType<E>> entityType, int primaryColor, int secondaryColor, Item.Properties itemProperties) {
-        return () -> new DeferredSpawnEggItem(entityType, primaryColor, secondaryColor, itemProperties);
+        Item.Properties itemProperties, Supplier<EntityType<E>> entityType) {
+        return () -> new SpawnEggItem(itemProperties.spawnEgg(entityType.get()));
     }
 
     @Override
