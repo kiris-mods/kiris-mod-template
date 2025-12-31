@@ -54,8 +54,8 @@ ordering = "NONE"
 side = "BOTH"
 
 [mc-publish]
-curseforge = "curseforge_id"
-modrinth = "modrinth_id"
+curseforge = "${curseforge_id}"
+modrinth = "${modrinth_id}"
 loaders = ["neoforge"]
 
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
