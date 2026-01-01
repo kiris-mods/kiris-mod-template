@@ -93,6 +93,9 @@ An update has been released for Mysterious Biomes via [CurseForge](https://www.c
         uses: Up-Mods/action-discord-release@main
         with:
           version: ${{ env.TAG }}
+          webhook-username: "Mod Update News"
+          ping-notification-role: false
+          webhook-avatar-url: https://raw.githubusercontent.com/kiris-mods/mysterious-biomes/refs/heads/devs/common/src/main/resources/logo.png
           webhook-url: ${{ secrets.ANNOUNCEMENT_WEBHOOK_URL }}
           curseforge-project-id: ${{ steps.publish_fabric.outputs.curseforge-id }}
           modrinth-project-id: ${{ steps.publish_fabric.outputs.modrinth-id }}
