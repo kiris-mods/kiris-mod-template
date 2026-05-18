@@ -6,10 +6,6 @@ plugins {
 neoForge {
     version = neoforge_version
     // If they exist, access transformers are automatically detected now.
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
-    }
 
     runs {
         configureEach {

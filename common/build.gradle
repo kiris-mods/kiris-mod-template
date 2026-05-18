@@ -4,12 +4,8 @@ plugins {
 }
 
 neoForge {
-    neoFormVersion = neo_form_version
     // If they exist, access transformers are automatically detected now.
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
-    }
+    neoFormVersion = neo_form_version
 }
 
 dependencies {
