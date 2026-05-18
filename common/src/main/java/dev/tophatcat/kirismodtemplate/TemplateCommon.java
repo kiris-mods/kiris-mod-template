@@ -20,21 +20,49 @@
  */
 package dev.tophatcat.kirismodtemplate;
 
+import com.mojang.logging.LogUtils;
+import dev.tophatcat.kirismodtemplate.init.TMCreativeTab;
 import dev.tophatcat.kirismodtemplate.platform.IPlatform;
+
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.ServiceLoader;
+
+import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TemplateCommon {
 
     public static final String MOD_ID = "kirismodtemplate";
-    public static final String MOD_NAME = "Kiri's Mod Template";
-    public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
-    public static final IPlatform COMMON_PLATFORM = ServiceLoader.load(IPlatform.class).findFirst().orElseThrow();
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
+    }
 
     public static void init() {
-        LOG.debug("We are currently loaded via the {} mod loader in a {} environment!",
-            COMMON_PLATFORM.getPlatformName(),
-            COMMON_PLATFORM.getEnvironmentName());
+        loadClass(TMCreativeTab.class);
+    }
+
+    public static <T> T loadService(Class<T> serviceClass) {
+        return ServiceLoader.load(serviceClass, serviceClass.getClassLoader()).findFirst()
+            .orElseThrow(() -> new NoSuchElementException("Unable to find implementation service for " + serviceClass.getName()));
+    }
+
+    private static void loadClass(Class<?> clazz) {
+        var mask = Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
+        var count = Arrays.stream(clazz.getDeclaredFields()).filter(field -> (field.getModifiers() | mask) == mask).map(field -> {
+                try {
+                    return field.get(null);
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("Access error while registering %s from %s".formatted(field.getName(), clazz.getName()), e);
+                }
+            })
+            .filter(Objects::nonNull)
+            .count();
+        LOGGER.debug("Loaded {} objects from {}", count, clazz.getName());
     }
 }

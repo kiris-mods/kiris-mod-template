@@ -2,27 +2,29 @@ plugins {
     id "idea"
     id "java-library"
     id "maven-publish"
-    id "net.neoforged.licenser"
 }
 
 boolean noTag = !providers.environmentVariable("TAG").getOrNull()
 boolean isPreviewBuild = providers.environmentVariable("TAG").getOrNull().with { !it || it.matches(".+-.+") }
-def buildTime = providers.environmentVariable("BUILD_TIME").orElse(project.provider { new Date().format('yyyyMMddHHmmss') })
-version = providers.environmentVariable("TAG").getOrElse("${minecraft_version}-deveopment") + (
-    (isPreviewBuild && noTag) ? "+${providers.environmentVariable("BUILD_NUMBER").map { "build.$it" as String }.orElse(buildTime).get()}" : ""
+def buildTime = providers.environmentVariable("BUILD_TIME").orElse(project.provider { new Date().format("yyyy-MM-dd'T'HH:mm:ssZ", TimeZone.getTimeZone("UTC")) })
+version = providers.environmentVariable("TAG").getOrElse("${minecraft_version}-development") + (
+    (isPreviewBuild && noTag) ? providers.environmentVariable("BUILD_NUMBER").map { "+build.$it".toString() }.getOrElse("") : ""
 )
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(java_version)
+        vendor = JvmVendorSpec.MICROSOFT
+    }
     withSourcesJar()
-    withJavadocJar()
+//    withJavadocJar()
 }
 
 repositories {
     mavenCentral()
     maven {
         name = "Sponge"
-        url = "https://repo.spongepowered.org/repository/maven-public/"
+        url = "https://repo.spongepowered.org/repository/maven-public"
     }
 
     maven {
@@ -32,32 +34,32 @@ repositories {
 
     maven {
         name = "Team Resourceful Maven"
-        url = "https://maven.teamresourceful.com/repository/maven-releases/"
+        url = "https://maven.teamresourceful.com/repository/maven-releases"
     }
 
     maven {
         name = "TerraformersMC"
-        url = "https://maven.terraformersmc.com/releases/"
+        url = "https://maven.terraformersmc.com/releases"
     }
 
     maven {
-        name = "uuid.gg Maven Repository"
-        url = "https://maven.uuid.gg/releases/"
+        name = "Up-Mods"
+        url = "https://maven.uuid.gg/releases"
     }
 
     maven {
         name = "Minecraft Forge (Used for Terrablender)"
-        url = "https://maven.minecraftforge.net/"
+        url = "https://maven.minecraftforge.net"
     }
 
     maven {
         name = "SmartBrainLib (SBL) Maven Repo"
-        url = "https://dl.cloudsmith.io/public/tslat/sbl/maven/"
+        url = "https://dl.cloudsmith.io/public/tslat/sbl/maven"
     }
 
     maven {
         name = "GeckoLib"
-        url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/"
+        url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven"
         content {
             includeGroup("software.bernie.geckolib")
         }
@@ -65,16 +67,24 @@ repositories {
 
     maven {
         name = "Modrinth"
-        url = "https://api.modrinth.com/maven/"
+        url = "https://api.modrinth.com/maven"
         content {
             includeGroup "maven.modrinth"
         }
     }
 }
 
+dependencies {
+    compileOnly("com.google.auto.service:auto-service-annotations:1.1.1")
+    annotationProcessor("com.google.auto.service:auto-service:1.1.1")
+
+    compileOnlyApi("org.jetbrains:annotations:26.0.2-1")
+    compileOnlyApi("org.jspecify:jspecify:1.0.0")
+}
+
 // Declare capabilities on the outgoing configurations.
 // Read more about capabilities here: https://docs.gradle.org/current/userguide/component_capabilities.html#sec:declaring-additional-capabilities-for-a-local-component
-["apiElements", "runtimeElements", "sourcesElements", "javadocElements"].each { variant ->
+["apiElements", "runtimeElements", "sourcesElements", /*"javadocElements"*/].each { variant ->
     configurations."$variant".outgoing {
         capability("$group:${project.name}:$version")
         capability("$group:${project.name}-${minecraft_version}:$version")
@@ -101,11 +111,10 @@ jar {
     manifest {
         attributes([
             "Specification-Title"         : project.mod_name,
-            "Specification-Vendor"        : project.author,
             "Specification-Version"       : project.provider { project.version },
             "Implementation-Title"        : project.name,
             "Implementation-Version"      : project.provider { project.version },
-            "Implementation-Vendor"       : project.author,
+            "Implementation-Timestamp"    : buildTime,
             "Built-On-Java"               : "${System.getProperty("java.vm.version")} (${System.getProperty("java.vm.vendor")})",
             "Built-On-Minecraft"          : project.minecraft_version
         ])
@@ -118,17 +127,16 @@ processResources {
         "group"                               : project.group,
         "mod_name"                            : project.mod_name,
         "mod_id"                              : project.mod_id,
-        "author"                              : project.author,
         "credits"                             : project.credits,
-        "license"                             : project.license,
         "description"                         : project.description,
 
-        "display_url"                         : project.display_url,
-        "discord"                             : project.discord,
-        "mod_source"                          : project.mod_source,
+        "homepage_url"                        : project.homepage_url,
+        "discord_url"                         : project.discord_url,
+        "sources_url"                         : project.sources_url,
+        "issues_url"                          : project.issues_url,
         "license_url"                         : project.license_url,
-        "modrinth_url"                        : project.modrinth_url,
-        "curseforge_url"                      : project.curseforge_url,
+        "modrinth_url"                        : "https://modrinth.com/mod/${project.modrinth_id}",
+        "curseforge_url"                      : "https://mods.cf/${project.curseforge_id}",
 
         "java_version"                        : project.java_version,
         "minecraft_version"                   : project.minecraft_version,
@@ -140,17 +148,17 @@ processResources {
         "fabric_version"                      : project.fabric_version,
         "fabric_loader_version"               : project.fabric_loader_version,
 
-        "smart_brain_lib_neoforge_version"    : project.smart_brain_lib_neoforge_version,
-        "smart_brain_lib_fabric_version"      : project.smart_brain_lib_fabric_version,
-
         "geckolib_neoforge_version"           : project.geckolib_neoforge_version,
         "geckolib_fabric_version"             : project.geckolib_fabric_version,
+
+        "smart_brain_lib_neoforge_version"    : project.smart_brain_lib_neoforge_version,
+        "smart_brain_lib_fabric_version"      : project.smart_brain_lib_fabric_version,
 
         "resourceful_config_neoforge_version" : project.resourceful_config_neoforge_version,
         "resourceful_config_fabric_version"   : project.resourceful_config_fabric_version,
 
         "terrablender_neoforge_version"       : project.terrablender_neoforge_version,
-        "terrablender_fabric_version"         : project.terrablender_fabric_version
+        "terrablender_fabric_version"         : project.terrablender_fabric_version,
     ]
 
     var jsonExpandProperties = expandProperties.collectEntries {
@@ -167,24 +175,6 @@ processResources {
 
     inputs.properties(expandProperties)
 }
-
-license {
-    ignoreFailures = true
-    header = rootProject.file("LICENSE_HEADER.txt")
-    newLine = false
-    include "**/*.java"
-    include "**/*.kt"
-    exclude "**/package-info.java"
-    exclude "**/module-info.java"
-    properties {
-        name = "KiriCattus"
-        year = "2013 - " + Calendar.getInstance().get(Calendar.YEAR)
-        license_link = project.license_url
-        project_information = license_description
-    }
-}
-
-tasks.named("assemble").configure{dependsOn "licenseFormat"}
 
 publishing {
     publications {
@@ -206,7 +196,6 @@ publishing {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
     it.options.release.set(java_version.toInteger())
 }
 

@@ -22,41 +22,43 @@ package dev.tophatcat.kirismodtemplate;
 
 import dev.tophatcat.kirismodtemplate.client.TemplateRenderingNeo;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 @Mod(TemplateCommon.MOD_ID)
 public class TemplateNeo {
 
-    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES = DeferredRegister.create(
-        Registries.BLOCK_ENTITY_TYPE, TemplateCommon.MOD_ID);
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(
-        Registries.BLOCK, TemplateCommon.MOD_ID);
-    public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(
-        Registries.ENTITY_TYPE, TemplateCommon.MOD_ID);
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(
-        Registries.ITEM, TemplateCommon.MOD_ID);
-    public static final DeferredRegister<SoundEvent> SOUND_EVENTS = DeferredRegister.create(
-        Registries.SOUND_EVENT, TemplateCommon.MOD_ID);
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS = DeferredRegister.create(
-        Registries.CREATIVE_MODE_TAB, TemplateCommon.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES
+        = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, TemplateCommon.MOD_ID);
+    public static final DeferredRegister.Blocks BLOCKS
+        = DeferredRegister.createBlocks(TemplateCommon.MOD_ID);
+    public static final DeferredRegister.Entities ENTITIES
+        = DeferredRegister.createEntities(TemplateCommon.MOD_ID);
+    public static final DeferredRegister.Items ITEMS
+        = DeferredRegister.createItems(TemplateCommon.MOD_ID);
+    public static final DeferredRegister<SoundEvent> SOUND_EVENTS
+        = DeferredRegister.create(Registries.SOUND_EVENT, TemplateCommon.MOD_ID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_TABS
+        = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, TemplateCommon.MOD_ID);
+    public static final DeferredRegister<EntityDataSerializer<?>> ENTITY_DATA_SERIALIZERS
+        = DeferredRegister.create(NeoForgeRegistries.ENTITY_DATA_SERIALIZERS, TemplateCommon.MOD_ID);
 
     public TemplateNeo(IEventBus bus) {
         BLOCK_ENTITIES.register(bus);
         BLOCKS.register(bus);
+        CREATIVE_TABS.register(bus);
         ENTITIES.register(bus);
+        ENTITY_DATA_SERIALIZERS.register(bus);
         ITEMS.register(bus);
         SOUND_EVENTS.register(bus);
-        CREATIVE_TABS.register(bus);
         TemplateCommon.init();
 
         if (FMLEnvironment.getDist() == Dist.CLIENT) {

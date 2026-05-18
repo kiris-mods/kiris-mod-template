@@ -20,26 +20,48 @@
  */
 package dev.tophatcat.kirismodtemplate.platform;
 
+import com.google.auto.service.AutoService;
+import com.mojang.logging.LogUtils;
 import dev.tophatcat.kirismodtemplate.TemplateCommon;
+
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricTrackedDataRegistry;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataSerializer;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import org.slf4j.Logger;
 
+@AutoService(IPlatform.class)
 public class PlatformFabric implements IPlatform {
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     @Override
     public String getPlatformName() {
@@ -48,7 +70,7 @@ public class PlatformFabric implements IPlatform {
 
     @Override
     public boolean isModLoaded(String modId) {
-        return FabricLoader.getInstance().isModLoaded(TemplateCommon.MOD_ID);
+        return FabricLoader.getInstance().isModLoaded(modId);
     }
 
     @Override
@@ -63,18 +85,28 @@ public class PlatformFabric implements IPlatform {
     }
 
     @Override
-    public <T extends Block> Supplier<T> registerBlock(String id, Supplier<T> block) {
-        return registerSupplier(BuiltInRegistries.BLOCK, id, block);
+    public <T extends Block> Supplier<T> registerBlock(String id, Function<BlockBehaviour.Properties, T> factory) {
+        return registerBlock(id, factory, BlockBehaviour.Properties::of);
     }
 
     @Override
-    public <T extends Entity> Supplier<EntityType<T>> registerEntity(String id, Supplier<EntityType<T>> entity) {
-        return registerSupplier(BuiltInRegistries.ENTITY_TYPE, id, entity);
+    public <T extends Block> Supplier<T> registerBlock(String id, Function<BlockBehaviour.Properties, T> factory, Supplier<BlockBehaviour.Properties> propertiesGetter) {
+        return registerWithProperties(BuiltInRegistries.BLOCK, id, factory, propertiesGetter, (resourceKey, props) -> props.setId(resourceKey));
     }
 
     @Override
-    public <T extends Item> Supplier<T> registerItem(String id, Supplier<T> item) {
-        return registerSupplier(BuiltInRegistries.ITEM, id, item);
+    public <T extends Entity> Supplier<EntityType<T>> registerEntity(String id, EntityType.EntityFactory<T> entity, MobCategory mobCategory, UnaryOperator<EntityType.Builder<T>> properties) {
+        return registerSupplier(BuiltInRegistries.ENTITY_TYPE, id, () -> properties.apply(EntityType.Builder.of(entity, mobCategory)).build(ResourceKey.create(Registries.ENTITY_TYPE, TemplateCommon.id(id))));
+    }
+
+    @Override
+    public <T extends Item> Supplier<T> registerItem(String id, Function<Item.Properties, T> factory) {
+        return registerItem(id, factory, Item.Properties::new);
+    }
+
+    @Override
+    public <T extends Item> Supplier<T> registerItem(String id, Function<Item.Properties, T> factory, Supplier<Item.Properties> propertiesGetter) {
+        return registerWithProperties(BuiltInRegistries.ITEM, id, factory, propertiesGetter, (resourceKey, props) -> props.setId(resourceKey));
     }
 
     @Override
@@ -83,33 +115,42 @@ public class PlatformFabric implements IPlatform {
     }
 
     @Override
-    public <T extends CreativeModeTab> Supplier<T> registerCreativeModeTab(String id, Supplier<T> tab) {
-        return registerSupplier(BuiltInRegistries.CREATIVE_MODE_TAB, id, tab);
+    public Supplier<CreativeModeTab> registerCreativeModeTab(String id, Supplier<ItemStack> icon, Consumer<CreativeModeTab.Builder> tab) {
+        return registerSupplier(BuiltInRegistries.CREATIVE_MODE_TAB, id, () -> {
+            var builder = FabricItemGroup.builder().icon(icon).title(Component.translatable(Util.makeDescriptionId("itemGroup", TemplateCommon.id(id))));
+            tab.accept(builder);
+            return builder.build();
+        });
     }
 
     @Override
-    public <E extends Mob> Supplier<SpawnEggItem> makeSpawnEgg(
-        Item.Properties itemProperties, Supplier<EntityType<E>> entityType) {
-        return () -> new SpawnEggItem(itemProperties.spawnEgg(entityType.get()));
+    public <E extends Mob> Supplier<SpawnEggItem> registerSpawnEgg(String id, Supplier<EntityType<E>> entityType, Supplier<Item.Properties> properties) {
+        return registerItem(id, SpawnEggItem::new, () -> properties.get().spawnEgg(entityType.get()));
     }
 
     @Override
-    public CreativeModeTab.Builder newCreativeTabBuilder() {
-        return FabricItemGroup.builder();
+    public <T> EntityDataSerializer<T> registerDataSerializer(String id, EntityDataSerializer<T> serializer) {
+        FabricTrackedDataRegistry.register(TemplateCommon.id(id), serializer);
+        return serializer;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T, R extends Registry<? super T>> Supplier<T> registerSupplier(
-        R registry, String id, Supplier<T> object) {
-        final T registeredObject = Registry.register((Registry<T>) registry, Identifier.fromNamespaceAndPath(
-            TemplateCommon.MOD_ID, id), object.get());
+    @Override
+    public boolean isFakePlayer(Player player) {
+        return player instanceof FakePlayer;
+    }
+
+    static <T> Supplier<T> registerSupplier(Registry<? super T> registry, String id, Supplier<T> factory) {
+        var registeredObject = Registry.register(registry, TemplateCommon.id(id), factory.get());
         return () -> registeredObject;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T, R extends Registry<? super T>> Holder<T> registerHolder(
-        R registry, String id, Supplier<T> object) {
-        return Registry.registerForHolder((Registry<T>) registry, Identifier.fromNamespaceAndPath(
-            TemplateCommon.MOD_ID, id), object.get());
+    static <R, T extends R, P> Supplier<T> registerWithProperties(Registry<R> registry, String id, Function<P, T> factory, Supplier<P> propertiesGetter, BiFunction<ResourceKey<R>, P, P> keySetter) {
+        var registryId = ResourceKey.create(registry.key(), TemplateCommon.id(id));
+        var registeredObject = Registry.register(registry, registryId, factory.apply(keySetter.apply(registryId, propertiesGetter.get())));
+        return () -> registeredObject;
+    }
+
+    static <T, R extends Registry<? super T>> Holder<T> registerHolder(Registry<? super T> registry, String id, Supplier<T> factory) {
+        return Registry.registerForHolder(registry, TemplateCommon.id(id), factory.get());
     }
 }

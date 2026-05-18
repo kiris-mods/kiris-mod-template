@@ -1,5 +1,5 @@
-${project_information}
-Copyright (C) ${name} ${year}
+Author ${author}
+Copyright (C) ${year} ${mod_name}
 ${license_link}
 
 This library is free software; you can redistribute it and/or
