@@ -1,21 +1,6 @@
 plugins {
     id "multiloader-loader"
-    id "fabric-loom"
-}
-
-dependencies {
-    minecraft "com.mojang:minecraft:${minecraft_version}"
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}+${minecraft_version}"
-
-    // Dependencies we use for this mod to run as we expect it to.
-    modImplementation "net.tslat.smartbrainlib:SmartBrainLib-fabric-${minecraft_version}:${smart_brain_lib_fabric_version}"
-    modImplementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_fabric_version}"
-    modImplementation "com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-${minecraft_version}:${resourceful_config_fabric_version}"
-    modImplementation "com.github.glitchfiend:TerraBlender-fabric:${minecraft_version}-${terrablender_fabric_version}"
-    // Optional
-    modImplementation "maven.modrinth:jade:${jade_fabric_version}+fabric"
-    modImplementation "com.terraformersmc:modmenu:${modmenu_version}"
+    id "net.fabricmc.fabric-loom"
 }
 
 loom {
@@ -45,4 +30,19 @@ loom {
             runDir("runs/server")
         }
     }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}+${minecraft_version}"
+
+    // Dependencies we use for this mod to run as we expect it to.
+    //implementation "net.tslat.smartbrainlib:SmartBrainLib-fabric-${minecraft_version}:${smart_brain_lib_fabric_version}"
+    //implementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_fabric_version}"
+    //implementation "com.teamresourceful.resourcefulconfig:resourcefulconfig-fabric-${minecraft_version}:${resourceful_config_fabric_version}"
+    implementation "com.github.glitchfiend:TerraBlender-fabric:${minecraft_version}-${terrablender_fabric_version}"
+    // Optional
+    implementation "maven.modrinth:jade:${jade_fabric_version}+fabric"
+    implementation "com.terraformersmc:modmenu:${modmenu_version}"
 }

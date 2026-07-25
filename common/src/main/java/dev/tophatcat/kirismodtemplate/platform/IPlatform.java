@@ -1,23 +1,3 @@
-/*
- * The template workspace that Kiri uses for making mods for Minecraft on both NeoForge and Fabric.
- * Copyright (C) KiriCattus 2013 - 2025
- * https://github.com/kiris-mods/kiris-mod-template/blob/dev/LICENSE.md
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
- * USA
- */
 package dev.tophatcat.kirismodtemplate.platform;
 
 import java.util.function.Consumer;
@@ -26,13 +6,11 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import dev.tophatcat.kirismodtemplate.TemplateCommon;
-import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -69,9 +47,6 @@ public interface IPlatform {
     default <E extends Mob> Supplier<SpawnEggItem> registerSpawnEgg(String id, Supplier<EntityType<E>> entityType, Supplier<Item.Properties> propertiesGetter) {
         return registerItem(id, SpawnEggItem::new, () -> propertiesGetter.get().spawnEgg(entityType.get()));
     }
-    <T> EntityDataSerializer<T> registerDataSerializer(String id, EntityDataSerializer<T> serializer);
-
-    boolean isFakePlayer(Player player);
 
     enum EnvironmentType {
         DEVELOPMENT("development"),

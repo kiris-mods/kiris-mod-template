@@ -30,11 +30,8 @@
   },
   "depends": {
     "fabricloader": ">=${fabric_loader_version}",
-    "fabric": "*",
+    "fabric-api": "*",
     "minecraft": "=${minecraft_version}",
-    "smartbrainlib": ">=${smart_brain_lib_fabric_version}",
-    "geckolib": ">=${geckolib_fabric_version}",
-    "resourcefulconfig": ">=${resourceful_config_fabric_version}",
     "terrablender": ">=${terrablender_fabric_version}",
     "java": ">=${java_version}"
   },

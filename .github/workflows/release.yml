@@ -56,7 +56,7 @@ jobs:
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ github.event.repository.name }}-Common-${{ env.TAG }}
+          name: ${{ github.event.repository.name }}-common-${{ env.TAG }}
           path: |
             Common/build/libs/*.jar
 
@@ -64,7 +64,7 @@ jobs:
         continue-on-error: true
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-Fabric-${{ env.TAG }}
+          name: ${{ github.event.repository.name }}-fabric-${{ env.TAG }}
           path: |
             Fabric/build/libs/*.jar
 
@@ -72,7 +72,7 @@ jobs:
         continue-on-error: true
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ github.event.repository.name }}-NeoForge-${{ env.TAG }}
+          name: ${{ github.event.repository.name }}-neoforge-${{ env.TAG }}
           path: |
             NeoForge/build/libs/*.jar
 
@@ -94,21 +94,21 @@ jobs:
       - name: Download build artifacts (Common)
         uses: actions/download-artifact@v7
         with:
-          name: ${{ github.event.repository.name }}-Common-${{ env.TAG }}
+          name: ${{ github.event.repository.name }}-common-${{ env.TAG }}
           path: |
             Common/build/libs
 
       - name: Download build artifacts (Fabric)
         uses: actions/download-artifact@v7
         with:
-          name: ${{ github.event.repository.name }}-Fabric-${{ env.TAG }}
+          name: ${{ github.event.repository.name }}-fabric-${{ env.TAG }}
           path: |
             Fabric/build/libs
 
       - name: Download build artifacts (NeoForge)
         uses: actions/download-artifact@v7
         with:
-          name: ${{ github.event.repository.name }}-NeoForge-${{ env.TAG }}
+          name: ${{ github.event.repository.name }}-neoforge-${{ env.TAG }}
           path: |
             NeoForge/build/libs
 
@@ -187,4 +187,4 @@ jobs:
           curseforge-emoji: "<:curseforge:1136460201608871986>"
           modrinth-emoji: "<:modrinth:1136460057471635516>"
           sourcecode-emoji: "<:github:1458216644580217166>"
-          thumbnail-url: https://raw.githubusercontent.com/kiris-mods/mysterious-lands/refs/heads/dev/common/src/main/resources/logo.png
+          thumbnail-url: https://raw.githubusercontent.com/kiris-mods/mysterious-lands/refs/heads/dev/common/src/main/resources/icon.png
